@@ -184,12 +184,12 @@ EGL_CORE_NATIVE_ENGINE			= 0x305B;
 }
 
 --[[ EGL 1.2 tokens renamed for consistency in EGL 1.3 --]]
-EGL.EGL_COLORSPACE					= EGL_VG_COLORSPACE;
-EGL.EGL_ALPHA_FORMAT				= EGL_VG_ALPHA_FORMAT;
-EGL.EGL_COLORSPACE_sRGB				= EGL_VG_COLORSPACE_sRGB;
-EGL.EGL_COLORSPACE_LINEAR			= EGL_VG_COLORSPACE_LINEAR;
-EGL.EGL_ALPHA_FORMAT_NONPRE			= EGL_VG_ALPHA_FORMAT_NONPRE;
-EGL.EGL_ALPHA_FORMAT_PRE			= EGL_VG_ALPHA_FORMAT_PRE;
+EGL.EGL_COLORSPACE					= EGL.EGL_VG_COLORSPACE;
+EGL.EGL_ALPHA_FORMAT				= EGL.EGL_VG_ALPHA_FORMAT;
+EGL.EGL_COLORSPACE_sRGB				= EGL.EGL_VG_COLORSPACE_sRGB;
+EGL.EGL_COLORSPACE_LINEAR			= EGL.EGL_VG_COLORSPACE_LINEAR;
+EGL.EGL_ALPHA_FORMAT_NONPRE			= EGL.EGL_VG_ALPHA_FORMAT_NONPRE;
+EGL.EGL_ALPHA_FORMAT_PRE			= EGL.EGL_VG_ALPHA_FORMAT_PRE;
 
 
 if ffi.abi("win") then
@@ -204,19 +204,20 @@ typedef HBITMAP EGLNativePixmapType;
 typedef HWND    EGLNativeWindowType;
 ]]
 else
-ffi.cdef[[
-typedef int   EGLNativeDisplayType;
-typedef void *EGLNativeWindowType;
-typedef void *EGLNativePixmapType;
-]]
-end
-
---[[
 -- For X Display System
+ffi.cdef[[
 typedef Display *EGLNativeDisplayType;
 typedef Pixmap   EGLNativePixmapType;
 typedef Window   EGLNativeWindowType;
+]]
+--ffi.cdef[[
+--typedef int   EGLNativeDisplayType;
+--typedef void *EGLNativeWindowType;
+--typedef void *EGLNativePixmapType;
 --]]
+end
+
+
 
 
 
@@ -226,8 +227,9 @@ ffi.cdef[[
 typedef EGLNativeDisplayType NativeDisplayType;
 typedef EGLNativePixmapType  NativePixmapType;
 typedef EGLNativeWindowType  NativeWindowType;
+]]
 
-
+ffi.cdef[[
 /* Define EGLint. This must be a signed integral type large enough to contain
  * all legal attribute names and values passed into and out of EGL, whether
  * their type is boolean, bitmask, enumerant (symbolic constant), integer,
@@ -236,10 +238,10 @@ typedef EGLNativeWindowType  NativeWindowType;
  * integer type.
  */
 typedef int32_t EGLint;
+]]
 
 
-
-
+ffi.cdef[[
 /* EGL Types */
 /* EGLint is defined in eglplatform.h */
 typedef unsigned int EGLBoolean;
@@ -253,10 +255,10 @@ typedef void *EGLClientBuffer;
 
 
 --[[ Out-of-band handle values --]]
-EGL_DEFAULT_DISPLAY		= ffi.cast("EGLNativeDisplayType", 0);
-EGL_NO_CONTEXT			= ffi.cast("EGLContext", 0);
-EGL_NO_DISPLAY			= ffi.cast("EGLDisplay", 0);
-EGL_NO_SURFACE			= ffi.cast("EGLSurface", 0);
+EGL.EGL_DEFAULT_DISPLAY		= ffi.cast("EGLNativeDisplayType", 0);
+EGL.EGL_NO_CONTEXT			= ffi.cast("EGLContext", 0);
+EGL.EGL_NO_DISPLAY			= ffi.cast("EGLDisplay", 0);
+EGL.EGL_NO_SURFACE			= ffi.cast("EGLSurface", 0);
 
 ffi.cdef[[
 
@@ -320,34 +322,4 @@ EGLSurface	eglCreatePbufferFromClientBuffer(EGLDisplay dpy, EGLenum buftype, EGL
 	__eglMustCastToProperFunctionPointerType eglGetProcAddress(const char *procname);
 ]]
 
-EGL.Lib = ffi.load("libOpenVG.dll")
-
 return EGL
-
-
-
---[[
-/*
-** Copyright (c) 2007-2009 The Khronos Group Inc.
-**
-** Permission is hereby granted, free of charge, to any person obtaining a
-** copy of this software and/or associated documentation files (the
-** "Materials"), to deal in the Materials without restriction, including
-** without limitation the rights to use, copy, modify, merge, publish,
-** distribute, sublicense, and/or sell copies of the Materials, and to
-** permit persons to whom the Materials are furnished to do so, subject to
-** the following conditions:
-**
-** The above copyright notice and this permission notice shall be included
-** in all copies or substantial portions of the Materials.
-**
-** THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-** EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-** MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-** IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-** CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
-*/
---]]
-
