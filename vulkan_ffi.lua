@@ -28,8 +28,11 @@ local ffi = require("ffi")
 
 
 
-#define VK_VERSION_1_0 1
+local  VK_VERSION_1_0 = 1
+
 require "vk_platform"
+
+local VKAPI_PTR = "";
 
 --[[
 #define VK_MAKE_VERSION(major, minor, patch) \
@@ -47,18 +50,21 @@ require "vk_platform"
         
 
 local function  VK_DEFINE_HANDLE(object) 
-    ffi.cdef(string.format("typedef struct %s_T* ", object));
+    local str = string.format("typedef struct %s_T * %s;", object, object)
+    print("object: ", str)
+    ffi.cdef(str);
 end
 
-#if defined(__LP64__) || defined(_WIN64) || defined(__x86_64__) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
+--if defined(__LP64__) || defined(_WIN64) || defined(__x86_64__) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
+local VK_DEFINE_NON_DISPATCHABLE_HANDLE = nil;
 if ffi.abi("64-bit") then
-    local function VK_DEFINE_NON_DISPATCHABLE_HANDLE(object) 
-        ffi.cdef(string.format("typedef struct %s_T *", object));
-    end
+VK_DEFINE_NON_DISPATCHABLE_HANDLE = function(object) 
+        ffi.cdef(string.format("typedef struct %s_T * %s;", object, object));
+end
 else
-    local function VK_DEFINE_NON_DISPATCHABLE_HANDLE(object) 
-        ffi.cdef(string.format("typedef uint64_t %s", object);
-    end
+VK_DEFINE_NON_DISPATCHABLE_HANDLE = function(object) 
+        ffi.cdef(string.format("typedef uint64_t %s;", object));
+end
 end
         
 
@@ -69,49 +75,51 @@ typedef uint64_t VkDeviceSize;
 typedef uint32_t VkSampleMask;
 ]];
 
-VK_DEFINE_HANDLE(VkInstance)
-VK_DEFINE_HANDLE(VkPhysicalDevice)
-VK_DEFINE_HANDLE(VkDevice)
-VK_DEFINE_HANDLE(VkQueue)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkSemaphore)
-VK_DEFINE_HANDLE(VkCommandBuffer)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkFence)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkDeviceMemory)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkBuffer)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkImage)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkEvent)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkQueryPool)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkBufferView)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkImageView)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkShaderModule)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkPipelineCache)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkPipelineLayout)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkRenderPass)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkPipeline)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkDescriptorSetLayout)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkSampler)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkDescriptorPool)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkDescriptorSet)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkFramebuffer)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkCommandPool)
+VK_DEFINE_HANDLE("VkInstance")
+VK_DEFINE_HANDLE("VkPhysicalDevice")
+VK_DEFINE_HANDLE("VkDevice")
+VK_DEFINE_HANDLE("VkQueue")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkSemaphore")
+VK_DEFINE_HANDLE("VkCommandBuffer")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkFence")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkDeviceMemory")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkBuffer")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkImage")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkEvent")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkQueryPool")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkBufferView")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkImageView")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkShaderModule")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkPipelineCache")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkPipelineLayout")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkRenderPass")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkPipeline")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkDescriptorSetLayout")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkSampler")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkDescriptorPool")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkDescriptorSet")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkFramebuffer")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkCommandPool")
 
-ffi.cdef[[
-static const int VK_LOD_CLAMP_NONE                = 1000.0;
-static const int VK_REMAINING_MIP_LEVELS          = (~0U);
-static const int VK_REMAINING_ARRAY_LAYERS        = (~0U);
-static const int VK_WHOLE_SIZE                    = (~0ULL);
-static const int VK_ATTACHMENT_UNUSED             = (~0U);
-static const int VK_TRUE                          = 1;
-static const int VK_FALSE                         = 0;
-static const int VK_QUEUE_FAMILY_IGNORED          = (~0U);
-static const int VK_SUBPASS_EXTERNAL              = (~0U);
-static const int VK_MAX_PHYSICAL_DEVICE_NAME_SIZE = 256;
-static const int VK_UUID_SIZE                     = 16;
-static const int VK_MAX_MEMORY_TYPES              = 32;
-static const int VK_MAX_MEMORY_HEAPS              = 16;
-static const int VK_MAX_EXTENSION_NAME_SIZE       = 256;
-static const int VK_MAX_DESCRIPTION_SIZE          = 256;
-]]
+--ffi.cdef[[
+ffi.cdef[[static const int VK_LOD_CLAMP_NONE                = 1000;]]
+ffi.cdef[[static const int VK_REMAINING_MIP_LEVELS          = (~0U);]]
+ffi.cdef[[static const int VK_REMAINING_ARRAY_LAYERS        = (~0U);]]
+
+--ffi.cdef[[static const int VK_WHOLE_SIZE                    = (~0ULL);]]
+
+ffi.cdef[[static const int VK_ATTACHMENT_UNUSED             = (~0U);]]
+ffi.cdef[[static const int VK_TRUE                          = 1;]]
+ffi.cdef[[static const int VK_FALSE                         = 0;]]
+ffi.cdef[[static const int VK_QUEUE_FAMILY_IGNORED          = (~0U);]]
+ffi.cdef[[static const int VK_SUBPASS_EXTERNAL              = (~0U);]]
+ffi.cdef[[static const int VK_MAX_PHYSICAL_DEVICE_NAME_SIZE = 256;]]
+ffi.cdef[[static const int VK_UUID_SIZE                     = 16;]]
+ffi.cdef[[static const int VK_MAX_MEMORY_TYPES              = 32;]]
+ffi.cdef[[static const int VK_MAX_MEMORY_HEAPS              = 16;]]
+ffi.cdef[[static const int VK_MAX_EXTENSION_NAME_SIZE       = 256;]]
+ffi.cdef[[static const int VK_MAX_DESCRIPTION_SIZE          = 256;]]
+--]]
 
 ffi.cdef[[
 typedef enum VkPipelineCacheHeaderVersion {
@@ -1106,7 +1114,7 @@ typedef enum VkStencilFaceFlagBits {
 typedef VkFlags VkStencilFaceFlags;
 ]]
 
-ffi.cdef[[
+ffi.cdef(string.gsub([[
 typedef void* (VKAPI_PTR *PFN_vkAllocationFunction)(
     void*                                       pUserData,
     size_t                                      size,
@@ -1137,7 +1145,7 @@ typedef void (VKAPI_PTR *PFN_vkInternalFreeNotification)(
     VkSystemAllocationScope                     allocationScope);
 
 typedef void (VKAPI_PTR *PFN_vkVoidFunction)(void);
-]]
+]], "VKAPI_PTR", VKAPI_PTR))
 
 ffi.cdef[[
 typedef struct VkApplicationInfo {
