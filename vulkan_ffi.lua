@@ -1,38 +1,33 @@
 local ffi = require("ffi")
 
---[[
-/*
-** Copyright (c) 2015-2016 The Khronos Group Inc.
-**
-** Permission is hereby granted, free of charge, to any person obtaining a
-** copy of this software and/or associated documentation files (the
-** "Materials"), to deal in the Materials without restriction, including
-** without limitation the rights to use, copy, modify, merge, publish,
-** distribute, sublicense, and/or sell copies of the Materials, and to
-** permit persons to whom the Materials are furnished to do so, subject to
-** the following conditions:
-**
-** The above copyright notice and this permission notice shall be included
-** in all copies or substantial portions of the Materials.
-**
-** THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-** EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-** MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-** IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-** CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
-*/
---]]
-
-
-
 
 local  VK_VERSION_1_0 = 1
 
-require "vk_platform"
+local vk_plat = require "vk_platform"
 
-local VKAPI_PTR = "";
+-- things to substitute
+local subs = {
+    VKAPI_PTR = vk_plat.VKAPI_PTR;
+    VKAPI_ATTR = vk_plat.VKAPI_ATTR;
+    VKAPI_CALL = vk_plat.VKAPI_CALL;
+
+}
+
+-- This CDEF is a convenience for setting up C declarations.
+-- The primary benefit is that it will make the substitutions
+-- of the VKAPI_XXX strings.   It may not be strictly needed
+-- since LuaJIT will figure out the calling convention, but 
+-- it doesn't hurt anything to have it here either.
+local function CDEF(target)
+    local str = target
+    for key,value in pairs(subs) do
+        str = string.gsub(str, key, value)
+    end
+
+    ffi.cdef(str);
+
+    print(str)
+end
 
 --[[
 #define VK_MAKE_VERSION(major, minor, patch) \
@@ -51,29 +46,28 @@ local VKAPI_PTR = "";
 
 local function  VK_DEFINE_HANDLE(object) 
     local str = string.format("typedef struct %s_T * %s;", object, object)
-    print("object: ", str)
     ffi.cdef(str);
 end
 
 --if defined(__LP64__) || defined(_WIN64) || defined(__x86_64__) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
 local VK_DEFINE_NON_DISPATCHABLE_HANDLE = nil;
-if ffi.abi("64-bit") then
+if ffi.abi("64bit") then
 VK_DEFINE_NON_DISPATCHABLE_HANDLE = function(object) 
-        ffi.cdef(string.format("typedef struct %s_T * %s;", object, object));
+        CDEF(string.format("typedef struct %s_T * %s;", object, object));
 end
 else
 VK_DEFINE_NON_DISPATCHABLE_HANDLE = function(object) 
-        ffi.cdef(string.format("typedef uint64_t %s;", object));
+        CDEF(string.format("typedef uint64_t %s;", object));
 end
 end
         
 
-ffi.cdef[[
+CDEF [[
 typedef uint32_t VkFlags;
 typedef uint32_t VkBool32;
 typedef uint64_t VkDeviceSize;
 typedef uint32_t VkSampleMask;
-]];
+]]
 
 VK_DEFINE_HANDLE("VkInstance")
 VK_DEFINE_HANDLE("VkPhysicalDevice")
@@ -101,27 +95,28 @@ VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkDescriptorSet")
 VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkFramebuffer")
 VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkCommandPool")
 
---ffi.cdef[[
-ffi.cdef[[static const int VK_LOD_CLAMP_NONE                = 1000;]]
-ffi.cdef[[static const int VK_REMAINING_MIP_LEVELS          = (~0U);]]
-ffi.cdef[[static const int VK_REMAINING_ARRAY_LAYERS        = (~0U);]]
-
 --ffi.cdef[[static const int VK_WHOLE_SIZE                    = (~0ULL);]]
 
-ffi.cdef[[static const int VK_ATTACHMENT_UNUSED             = (~0U);]]
-ffi.cdef[[static const int VK_TRUE                          = 1;]]
-ffi.cdef[[static const int VK_FALSE                         = 0;]]
-ffi.cdef[[static const int VK_QUEUE_FAMILY_IGNORED          = (~0U);]]
-ffi.cdef[[static const int VK_SUBPASS_EXTERNAL              = (~0U);]]
-ffi.cdef[[static const int VK_MAX_PHYSICAL_DEVICE_NAME_SIZE = 256;]]
-ffi.cdef[[static const int VK_UUID_SIZE                     = 16;]]
-ffi.cdef[[static const int VK_MAX_MEMORY_TYPES              = 32;]]
-ffi.cdef[[static const int VK_MAX_MEMORY_HEAPS              = 16;]]
-ffi.cdef[[static const int VK_MAX_EXTENSION_NAME_SIZE       = 256;]]
-ffi.cdef[[static const int VK_MAX_DESCRIPTION_SIZE          = 256;]]
---]]
+CDEF [[
+static const int VK_LOD_CLAMP_NONE                = 1000;
+static const int VK_REMAINING_MIP_LEVELS          = (~0U);
+static const int VK_REMAINING_ARRAY_LAYERS        = (~0U);
 
-ffi.cdef[[
+
+static const int VK_ATTACHMENT_UNUSED             = (~0U);
+static const int VK_TRUE                          = 1;
+static const int VK_FALSE                         = 0;
+static const int VK_QUEUE_FAMILY_IGNORED          = (~0U);
+static const int VK_SUBPASS_EXTERNAL              = (~0U);
+static const int VK_MAX_PHYSICAL_DEVICE_NAME_SIZE = 256;
+static const int VK_UUID_SIZE                     = 16;
+static const int VK_MAX_MEMORY_TYPES              = 32;
+static const int VK_MAX_MEMORY_HEAPS              = 16;
+static const int VK_MAX_EXTENSION_NAME_SIZE       = 256;
+static const int VK_MAX_DESCRIPTION_SIZE          = 256;
+]]
+
+CDEF [[
 typedef enum VkPipelineCacheHeaderVersion {
     VK_PIPELINE_CACHE_HEADER_VERSION_ONE = 1,
     VK_PIPELINE_CACHE_HEADER_VERSION_BEGIN_RANGE = VK_PIPELINE_CACHE_HEADER_VERSION_ONE,
@@ -131,7 +126,7 @@ typedef enum VkPipelineCacheHeaderVersion {
 } VkPipelineCacheHeaderVersion;
 ]]
 
-ffi.cdef[[
+CDEF [[
 typedef enum VkResult {
     VK_SUCCESS = 0,
     VK_NOT_READY = 1,
@@ -163,7 +158,7 @@ typedef enum VkResult {
 } VkResult;
 ]]
 
-ffi.cdef[[
+CDEF [[
 typedef enum VkStructureType {
     VK_STRUCTURE_TYPE_APPLICATION_INFO = 0,
     VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO = 1,
@@ -233,7 +228,7 @@ typedef enum VkStructureType {
 } VkStructureType;
 ]]
 
-ffi.cdef[[
+CDEF [[
 typedef enum VkSystemAllocationScope {
     VK_SYSTEM_ALLOCATION_SCOPE_COMMAND = 0,
     VK_SYSTEM_ALLOCATION_SCOPE_OBJECT = 1,
@@ -247,7 +242,7 @@ typedef enum VkSystemAllocationScope {
 } VkSystemAllocationScope;
 ]]
 
-ffi.cdef[[
+CDEF [[
 typedef enum VkInternalAllocationType {
     VK_INTERNAL_ALLOCATION_TYPE_EXECUTABLE = 0,
     VK_INTERNAL_ALLOCATION_TYPE_BEGIN_RANGE = VK_INTERNAL_ALLOCATION_TYPE_EXECUTABLE,
@@ -257,7 +252,7 @@ typedef enum VkInternalAllocationType {
 } VkInternalAllocationType;
 ]]
 
-ffi.cdef[[
+CDEF [[
 typedef enum VkFormat {
     VK_FORMAT_UNDEFINED = 0,
     VK_FORMAT_R4G4_UNORM_PACK8 = 1,
@@ -451,7 +446,7 @@ typedef enum VkFormat {
 } VkFormat;
 ]]
 
-ffi.cdef[[
+CDEF [[
 typedef enum VkImageType {
     VK_IMAGE_TYPE_1D = 0,
     VK_IMAGE_TYPE_2D = 1,
@@ -892,7 +887,7 @@ typedef VkFlags VkDeviceCreateFlags;
 typedef VkFlags VkDeviceQueueCreateFlags;
 ]]
 
-ffi.cdef[[
+CDEF [[
 typedef enum VkPipelineStageFlagBits {
     VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT = 0x00000001,
     VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT = 0x00000002,
@@ -1114,7 +1109,7 @@ typedef enum VkStencilFaceFlagBits {
 typedef VkFlags VkStencilFaceFlags;
 ]]
 
-ffi.cdef(string.gsub([[
+CDEF [[
 typedef void* (VKAPI_PTR *PFN_vkAllocationFunction)(
     void*                                       pUserData,
     size_t                                      size,
@@ -1145,9 +1140,9 @@ typedef void (VKAPI_PTR *PFN_vkInternalFreeNotification)(
     VkSystemAllocationScope                     allocationScope);
 
 typedef void (VKAPI_PTR *PFN_vkVoidFunction)(void);
-]], "VKAPI_PTR", VKAPI_PTR))
+]]
 
-ffi.cdef[[
+CDEF [[
 typedef struct VkApplicationInfo {
     VkStructureType    sType;
     const void*        pNext;
@@ -1179,7 +1174,7 @@ typedef struct VkAllocationCallbacks {
 } VkAllocationCallbacks;
 ]]
 
-ffi.cdef[[
+CDEF [[
 typedef struct VkPhysicalDeviceFeatures {
     VkBool32    robustBufferAccess;
     VkBool32    fullDrawIndexUint32;
@@ -1239,7 +1234,7 @@ typedef struct VkPhysicalDeviceFeatures {
 } VkPhysicalDeviceFeatures;
 ]]
 
-ffi.cdef[[
+CDEF [[
 typedef struct VkFormatProperties {
     VkFormatFeatureFlags    linearTilingFeatures;
     VkFormatFeatureFlags    optimalTilingFeatures;
@@ -1261,7 +1256,7 @@ typedef struct VkImageFormatProperties {
 } VkImageFormatProperties;
 ]]
 
-ffi.cdef[[
+CDEF [[
 typedef struct VkPhysicalDeviceLimits {
     uint32_t              maxImageDimension1D;
     uint32_t              maxImageDimension2D;
@@ -1372,7 +1367,7 @@ typedef struct VkPhysicalDeviceLimits {
 } VkPhysicalDeviceLimits;
 ]]
 
-ffi.cdef[[
+CDEF [[
 typedef struct VkPhysicalDeviceSparseProperties {
     VkBool32    residencyStandard2DBlockShape;
     VkBool32    residencyStandard2DMultisampleBlockShape;
@@ -2233,7 +2228,7 @@ typedef struct VkDrawIndirectCommand {
 ]]
 
 
-ffi.cdef[[
+CDEF [[
 typedef VkResult (VKAPI_PTR *PFN_vkCreateInstance)(const VkInstanceCreateInfo* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkInstance* pInstance);
 typedef void (VKAPI_PTR *PFN_vkDestroyInstance)(VkInstance instance, const VkAllocationCallbacks* pAllocator);
 typedef VkResult (VKAPI_PTR *PFN_vkEnumeratePhysicalDevices)(VkInstance instance, uint32_t* pPhysicalDeviceCount, VkPhysicalDevice* pPhysicalDevices);
@@ -2371,10 +2366,10 @@ typedef void (VKAPI_PTR *PFN_vkCmdBeginRenderPass)(VkCommandBuffer commandBuffer
 typedef void (VKAPI_PTR *PFN_vkCmdNextSubpass)(VkCommandBuffer commandBuffer, VkSubpassContents contents);
 typedef void (VKAPI_PTR *PFN_vkCmdEndRenderPass)(VkCommandBuffer commandBuffer);
 typedef void (VKAPI_PTR *PFN_vkCmdExecuteCommands)(VkCommandBuffer commandBuffer, uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers);
---]]
+]]
 
 
-ffi.cdef[[
+CDEF [[
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateInstance(
     const VkInstanceCreateInfo*                 pCreateInfo,
     const VkAllocationCallbacks*                pAllocator,
@@ -3174,19 +3169,19 @@ VKAPI_ATTR void VKAPI_CALL vkCmdExecuteCommands(
 ]]
 
 
-ffi.cdef[[
+CDEF [[
 static const int VK_KHR_surface = 1;
 ]]
 
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkSurfaceKHR)
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkSurfaceKHR")
 
-ffi.cdef[[
+CDEF [[
 static const int VK_KHR_SURFACE_SPEC_VERSION      = 25;
 ]]
 
 local VK_KHR_SURFACE_EXTENSION_NAME    = "VK_KHR_surface";
 
-ffi.cdef[[
+CDEF [[
 typedef enum VkColorSpaceKHR {
     VK_COLORSPACE_SRGB_NONLINEAR_KHR = 0,
     VK_COLORSPACE_BEGIN_RANGE = VK_COLORSPACE_SRGB_NONLINEAR_KHR,
@@ -3255,7 +3250,7 @@ typedef VkResult (VKAPI_PTR *PFN_vkGetPhysicalDeviceSurfacePresentModesKHR)(VkPh
 ]]
 
 
-ffi.cdef[[
+CDEF [[
 VKAPI_ATTR void VKAPI_CALL vkDestroySurfaceKHR(
     VkInstance                                  instance,
     VkSurfaceKHR                                surface,
@@ -3286,17 +3281,17 @@ VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceSurfacePresentModesKHR(
 ]]
 
 
-ffi.cdef[[
+CDEF [[
 static const int  VK_KHR_swapchain = 1;
 ]]
 
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkSwapchainKHR)
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkSwapchainKHR")
 
-ffi.cdef[[static const int VK_KHR_SWAPCHAIN_SPEC_VERSION    = 67;]]
+CDEF [[static const int VK_KHR_SWAPCHAIN_SPEC_VERSION    = 67;]]
 
 VK_KHR_SWAPCHAIN_EXTENSION_NAME   = "VK_KHR_swapchain"
 
-ffi.cdef[[
+CDEF [[
 typedef VkFlags VkSwapchainCreateFlagsKHR;
 
 typedef struct VkSwapchainCreateInfoKHR {
@@ -3339,7 +3334,7 @@ typedef VkResult (VKAPI_PTR *PFN_vkAcquireNextImageKHR)(VkDevice device, VkSwapc
 typedef VkResult (VKAPI_PTR *PFN_vkQueuePresentKHR)(VkQueue queue, const VkPresentInfoKHR* pPresentInfo);
 ]]
 
-ffi.cdef[[
+CDEF [[
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateSwapchainKHR(
     VkDevice                                    device,
     const VkSwapchainCreateInfoKHR*             pCreateInfo,
@@ -3371,15 +3366,17 @@ VKAPI_ATTR VkResult VKAPI_CALL vkQueuePresentKHR(
 ]]
 
 
---[[
-#define VK_KHR_display 1
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkDisplayKHR)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkDisplayModeKHR)
 
-#define VK_KHR_DISPLAY_SPEC_VERSION       21
-#define VK_KHR_DISPLAY_EXTENSION_NAME     "VK_KHR_display"
+CDEF [[ static const int VK_KHR_display = 1;]]
 
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkDisplayKHR")
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkDisplayModeKHR")
 
+CDEF [[static const int VK_KHR_DISPLAY_SPEC_VERSION      = 21;]]
+
+VK_KHR_DISPLAY_EXTENSION_NAME     = "VK_KHR_display"
+
+CDEF [[
 typedef enum VkDisplayPlaneAlphaFlagBitsKHR {
     VK_DISPLAY_PLANE_ALPHA_OPAQUE_BIT_KHR = 0x00000001,
     VK_DISPLAY_PLANE_ALPHA_GLOBAL_BIT_KHR = 0x00000002,
@@ -3455,8 +3452,9 @@ typedef VkResult (VKAPI_PTR *PFN_vkGetDisplayModePropertiesKHR)(VkPhysicalDevice
 typedef VkResult (VKAPI_PTR *PFN_vkCreateDisplayModeKHR)(VkPhysicalDevice physicalDevice, VkDisplayKHR display, const VkDisplayModeCreateInfoKHR*pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDisplayModeKHR* pMode);
 typedef VkResult (VKAPI_PTR *PFN_vkGetDisplayPlaneCapabilitiesKHR)(VkPhysicalDevice physicalDevice, VkDisplayModeKHR mode, uint32_t planeIndex, VkDisplayPlaneCapabilitiesKHR* pCapabilities);
 typedef VkResult (VKAPI_PTR *PFN_vkCreateDisplayPlaneSurfaceKHR)(VkInstance instance, const VkDisplaySurfaceCreateInfoKHR* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkSurfaceKHR* pSurface);
+]]
 
-#ifndef VK_NO_PROTOTYPES
+CDEF [[
 VKAPI_ATTR VkResult VKAPI_CALL vkGetPhysicalDeviceDisplayPropertiesKHR(
     VkPhysicalDevice                            physicalDevice,
     uint32_t*                                   pPropertyCount,
@@ -3497,12 +3495,17 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateDisplayPlaneSurfaceKHR(
     const VkDisplaySurfaceCreateInfoKHR*        pCreateInfo,
     const VkAllocationCallbacks*                pAllocator,
     VkSurfaceKHR*                               pSurface);
-#endif
+]]
 
-#define VK_KHR_display_swapchain 1
-#define VK_KHR_DISPLAY_SWAPCHAIN_SPEC_VERSION 9
-#define VK_KHR_DISPLAY_SWAPCHAIN_EXTENSION_NAME "VK_KHR_display_swapchain"
 
+CDEF [[
+static const int VK_KHR_display_swapchain = 1;
+static const int VK_KHR_DISPLAY_SWAPCHAIN_SPEC_VERSION = 9;
+]]
+
+VK_KHR_DISPLAY_SWAPCHAIN_EXTENSION_NAME = "VK_KHR_display_swapchain"
+
+CDEF [[
 typedef struct VkDisplayPresentInfoKHR {
     VkStructureType    sType;
     const void*        pNext;
@@ -3513,16 +3516,18 @@ typedef struct VkDisplayPresentInfoKHR {
 
 
 typedef VkResult (VKAPI_PTR *PFN_vkCreateSharedSwapchainsKHR)(VkDevice device, uint32_t swapchainCount, const VkSwapchainCreateInfoKHR* pCreateInfos, const VkAllocationCallbacks* pAllocator, VkSwapchainKHR* pSwapchains);
+]]
 
-#ifndef VK_NO_PROTOTYPES
+CDEF [[
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateSharedSwapchainsKHR(
     VkDevice                                    device,
     uint32_t                                    swapchainCount,
     const VkSwapchainCreateInfoKHR*             pCreateInfos,
     const VkAllocationCallbacks*                pAllocator,
     VkSwapchainKHR*                             pSwapchains);
-#endif
+]]
 
+--[[
 #ifdef VK_USE_PLATFORM_XLIB_KHR
 #define VK_KHR_xlib_surface 1
 #include <X11/Xlib.h>
@@ -3558,7 +3563,9 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vkGetPhysicalDeviceXlibPresentationSupportKHR(
     VisualID                                    visualID);
 #endif
 #endif /* VK_USE_PLATFORM_XLIB_KHR */
+--]]
 
+--[[
 #ifdef VK_USE_PLATFORM_XCB_KHR
 #define VK_KHR_xcb_surface 1
 #include <xcb/xcb.h>
@@ -3594,7 +3601,9 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vkGetPhysicalDeviceXcbPresentationSupportKHR(
     xcb_visualid_t                              visual_id);
 #endif
 #endif /* VK_USE_PLATFORM_XCB_KHR */
+--]]
 
+--[[
 #ifdef VK_USE_PLATFORM_WAYLAND_KHR
 #define VK_KHR_wayland_surface 1
 #include <wayland-client.h>
@@ -3629,7 +3638,9 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vkGetPhysicalDeviceWaylandPresentationSupportKHR(
     struct wl_display*                          display);
 #endif
 #endif /* VK_USE_PLATFORM_WAYLAND_KHR */
+--]]
 
+--[[
 #ifdef VK_USE_PLATFORM_MIR_KHR
 #define VK_KHR_mir_surface 1
 #include <mir_toolkit/client_types.h>
@@ -3664,7 +3675,9 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vkGetPhysicalDeviceMirPresentationSupportKHR(
     MirConnection*                              connection);
 #endif
 #endif /* VK_USE_PLATFORM_MIR_KHR */
+--]]
 
+--[[
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
 #define VK_KHR_android_surface 1
 #include <android/native_window.h>
@@ -3692,13 +3705,19 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateAndroidSurfaceKHR(
     VkSurfaceKHR*                               pSurface);
 #endif
 #endif /* VK_USE_PLATFORM_ANDROID_KHR */
+--]]
 
-#ifdef VK_USE_PLATFORM_WIN32_KHR
-#define VK_KHR_win32_surface 1
-#include <windows.h>
 
-#define VK_KHR_WIN32_SURFACE_SPEC_VERSION 5
-#define VK_KHR_WIN32_SURFACE_EXTENSION_NAME "VK_KHR_win32_surface"
+CDEF [[ static const int VK_KHR_win32_surface = 1;]]
+--#include <windows.h>
+
+CDEF [[static const int VK_KHR_WIN32_SURFACE_SPEC_VERSION = 5;]]
+
+VK_KHR_WIN32_SURFACE_EXTENSION_NAME = "VK_KHR_win32_surface"
+
+CDEF[[
+typedef void * HINSTANCE;
+typedef void * HWND;
 
 typedef VkFlags VkWin32SurfaceCreateFlagsKHR;
 
@@ -3714,7 +3733,6 @@ typedef struct VkWin32SurfaceCreateInfoKHR {
 typedef VkResult (VKAPI_PTR *PFN_vkCreateWin32SurfaceKHR)(VkInstance instance, const VkWin32SurfaceCreateInfoKHR* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkSurfaceKHR* pSurface);
 typedef VkBool32 (VKAPI_PTR *PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR)(VkPhysicalDevice physicalDevice, uint32_t queueFamilyIndex);
 
-#ifndef VK_NO_PROTOTYPES
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateWin32SurfaceKHR(
     VkInstance                                  instance,
     const VkWin32SurfaceCreateInfoKHR*          pCreateInfo,
@@ -3724,16 +3742,18 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateWin32SurfaceKHR(
 VKAPI_ATTR VkBool32 VKAPI_CALL vkGetPhysicalDeviceWin32PresentationSupportKHR(
     VkPhysicalDevice                            physicalDevice,
     uint32_t                                    queueFamilyIndex);
-#endif
-#endif /* VK_USE_PLATFORM_WIN32_KHR */
+]]
 
-#define VK_EXT_debug_report 1
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkDebugReportCallbackEXT)
+CDEF [[static const int VK_EXT_debug_report = 1;]]
 
-#define VK_EXT_DEBUG_REPORT_SPEC_VERSION  1
-#define VK_EXT_DEBUG_REPORT_EXTENSION_NAME "VK_EXT_debug_report"
+VK_DEFINE_NON_DISPATCHABLE_HANDLE("VkDebugReportCallbackEXT")
 
 
+CDEF [[static const int VK_EXT_DEBUG_REPORT_SPEC_VERSION  = 1;]]
+
+VK_EXT_DEBUG_REPORT_EXTENSION_NAME = "VK_EXT_debug_report"
+
+CDEF [[
 typedef enum VkDebugReportObjectTypeEXT {
     VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT = 0,
     VK_DEBUG_REPORT_OBJECT_TYPE_INSTANCE_EXT = 1,
@@ -3804,8 +3824,9 @@ typedef struct VkDebugReportCallbackCreateInfoEXT {
 typedef VkResult (VKAPI_PTR *PFN_vkCreateDebugReportCallbackEXT)(VkInstance instance, const VkDebugReportCallbackCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugReportCallbackEXT* pCallback);
 typedef void (VKAPI_PTR *PFN_vkDestroyDebugReportCallbackEXT)(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator);
 typedef void (VKAPI_PTR *PFN_vkDebugReportMessageEXT)(VkInstance instance, VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage);
+]]
 
-#ifndef VK_NO_PROTOTYPES
+CDEF [[
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugReportCallbackEXT(
     VkInstance                                  instance,
     const VkDebugReportCallbackCreateInfoEXT*   pCreateInfo,
@@ -3826,6 +3847,5 @@ VKAPI_ATTR void VKAPI_CALL vkDebugReportMessageEXT(
     int32_t                                     messageCode,
     const char*                                 pLayerPrefix,
     const char*                                 pMessage);
-#endif
---]]
+]]
 
