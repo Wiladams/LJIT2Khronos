@@ -1,5 +1,6 @@
 local ffi = require("ffi")
-
+local bit = require("bit")
+local lshift, rshift, bor, band = bit.lshift, bit.rshift, bit.bor, bit.band
 
 local  VK_VERSION_1_0 = 1
 
@@ -29,19 +30,20 @@ local function CDEF(target)
     print(str)
 end
 
---[[
-#define VK_MAKE_VERSION(major, minor, patch) \
-    (((major) << 22) | ((minor) << 12) | (patch))
 
-// Vulkan API version supported by this file
-#define VK_API_VERSION VK_MAKE_VERSION(1, 0, 3)
+local function VK_MAKE_VERSION(major, minor, patch) 
+    return  bor(lshift(major, 22), lshift(minor, 12), patch)
+end
 
-#define VK_VERSION_MAJOR(version) ((uint32_t)(version) >> 22)
-#define VK_VERSION_MINOR(version) (((uint32_t)(version) >> 12) & 0x3ff)
-#define VK_VERSION_PATCH(version) ((uint32_t)(version) & 0xfff)
---]]
+-- Vulkan API version supported by this file
+local VK_API_VERSION = VK_MAKE_VERSION(1, 0, 3)
 
---#define VK_NULL_HANDLE 0
+local function  VK_VERSION_MAJOR(version) return rshift(version, 22)
+local function  VK_VERSION_MINOR(version) return band(rshift(version, 12), 0x3ff)
+local function  VK_VERSION_PATCH(version) return band(version, 0xfff)
+
+
+local  VK_NULL_HANDLE = 0
         
 
 local function  VK_DEFINE_HANDLE(object) 
@@ -49,7 +51,6 @@ local function  VK_DEFINE_HANDLE(object)
     ffi.cdef(str);
 end
 
---if defined(__LP64__) || defined(_WIN64) || defined(__x86_64__) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
 local VK_DEFINE_NON_DISPATCHABLE_HANDLE = nil;
 if ffi.abi("64bit") then
 VK_DEFINE_NON_DISPATCHABLE_HANDLE = function(object) 
