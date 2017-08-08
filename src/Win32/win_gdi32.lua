@@ -8,7 +8,7 @@ local band = bit.band	-- &
 local bor = bit.bor	-- |
 local bnot = bit.bnot	-- ~
 
-require "WTypes"
+require "Win32/WTypes"
 
 ffi.cdef[[
 /* pixel types */
@@ -16,7 +16,7 @@ enum PFDPixelType
 {
 	PFD_TYPE_RGBA = 0,
 	ColorIndex = 1
-}
+};
 
     /* layer types */
 enum PFDLayerPlanes
@@ -24,7 +24,7 @@ enum PFDLayerPlanes
     PFD_MAIN_PLANE = 0,
     Overlay = 1,
     Underlay = (-1)
-}
+};
 
 
 /* PIXELFORMATDESCRIPTOR flags */

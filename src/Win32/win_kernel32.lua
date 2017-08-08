@@ -1,7 +1,7 @@
 local ffi = require "ffi"
 local C = ffi.C
 
-require "WinBase"
+require "Win32/WinBase"
 local kernel32 = ffi.load("kernel32");
 
 -- File System Calls

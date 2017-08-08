@@ -10,10 +10,10 @@ local ffi = require "ffi"
 local C = ffi.C
 
 
-require "win_gdi32"
-require "win_user32"
-require "win_kernel32"
-require "StopWatch"
+require "Win32/win_gdi32"
+require "Win32/win_user32"
+require "Win32/win_kernel32"
+require "Win32/StopWatch"
 
 local user32 = ffi.load("User32")
 local kernel32 = ffi.load("Kernel32")

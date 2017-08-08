@@ -2,7 +2,7 @@
 -- From WinBase.h
 local ffi = require "ffi"
 
-require "WTypes"
+require "Win32/WTypes"
 
 -- Winnt.h
 MAXIMUM_WAIT_OBJECTS = 64     -- Maximum number of wait objects

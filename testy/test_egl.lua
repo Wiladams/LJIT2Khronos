@@ -1,10 +1,10 @@
-package.path = package.path..";..\\?.lua;..\\Win32\\?.lua";
+package.path = package.path..";..\\src\\?.lua;..\\?.lua";
 
 local ffi = require "ffi"
 local bit = require "bit"
 local bor = bit.bor
 
-local NativeWindow = require "User32Window"
+local NativeWindow = require "Win32/User32Window"
 local EGL = require "egl_utils"
 
 local OpenVG = require "OpenVG"

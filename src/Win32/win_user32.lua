@@ -1,6 +1,6 @@
 local ffi = require "ffi"
-require "WTypes"
-require "win_kernel32"
+require "Win32/WTypes"
+require "Win32/win_kernel32"
 local kernel32 = ffi.load("Kernel32")
 local user32 = ffi.load("User32")
 
@@ -145,12 +145,12 @@ enum {
 
 enum {
 	SW_SHOW = 5,
-}
+};
 
 enum {
 	PM_REMOVE = 0x0001,
 	PM_NOYIELD = 0x0002,
-}
+};
 
 // dwWakeMask of MsgWaitForMultipleObjectsEx()
 enum {
@@ -168,15 +168,14 @@ enum {
 	QS_INPUT			= 0x0407,
 	QS_ALLEVENTS		= 0x04BF,
 	QS_ALLINPUT			= 0x04FF,
-}
+};
 
 // dwFlags of MsgWaitForMultipleObjectsEx()
 enum {
 	MWMO_WAITALL		= 0x0001,
-	MWMO_ALERTABLE		= 0x0002
-	,
+	MWMO_ALERTABLE		= 0x0002,
 	MWMO_INPUTAVAILABLE	= 0x0004,
-}
+};
 
 
 enum {

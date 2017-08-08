@@ -5,7 +5,7 @@
 	VG extensions
  --]]
 
-require "openvg"
+require "OpenVG"
 require "vgu"
 
 

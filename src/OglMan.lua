@@ -13,7 +13,7 @@ local lib  = ffi_OpenGL_lib or libs[ ffi.os ][ ffi.arch ]
 
 gl   = ffi.load( lib )
 
-require "WTypes"
+require "Win32/WTypes"
 
 ffi.cdef[[
 typedef unsigned int GLenum;
