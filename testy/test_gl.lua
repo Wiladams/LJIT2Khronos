@@ -4,8 +4,7 @@ local gl = require("khronos.gl.gl")
 local glext = require("khronos.gl.glext")
 local wglext = require("khronos.gl.wglext")
 
-local namespace = require("namespace")
-local ns = namespace()
+local ns = require("namespace")()
 
 ns = ns + gl.constants
 

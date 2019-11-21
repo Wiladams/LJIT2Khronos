@@ -419,7 +419,7 @@ WGL_ACCESS_WRITE_DISCARD_NV    = 0x00000002;
 -- WGL_EXT_swap_control_tear
 
 
-function DECLARE_HANDLE(name)
+local function DECLARE_HANDLE(name)
 	local decl = string.format([[
 		struct %s__ {
 			int unused;
@@ -438,10 +438,8 @@ DECLARE_HANDLE("HPGPUNV");
 DECLARE_HANDLE("HGPUNV");
 DECLARE_HANDLE("HVIDEOINPUTDEVICENV");
 
-ffi.cdef[[
-	typedef uint32_t DWORD;
-	typedef char CHAR;
-]]
+
+
 ffi.cdef[[
 typedef struct _GPU_DEVICE {
     DWORD  cb;
@@ -767,11 +765,8 @@ ffi.cdef[[
 	typedef int (__attribute__((__stdcall__)) *PROC)();
 
 	BOOL wglCopyContext(HGLRC hglrcSrc, HGLRC hglrcDst, UINT  mask);
-
 	HGLRC wglCreateContext(HDC hdc);
-
 	HGLRC wglCreateLayerContext(HDC hdc, int  iLayerPlane);
-
 	BOOL wglDeleteContext(HGLRC  hglrc);
 
 //	BOOL wglDescribeLayerPlane(HDC hdc,int  iPixelFormat, int  iLayerPlane, UINT  nBytes, LPLAYERPLANEDESCRIPTOR plpd);
@@ -807,6 +802,4 @@ ffi.cdef[[
 	typedef const char * (* PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC);
 
 	const char *wglGetExtensionsStringARB(HDC);
-
-
 ]]
