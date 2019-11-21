@@ -7,37 +7,105 @@ local bor = bit.bor
 local lshift = bit.lshift
 local rshift = bit.rshift
 
+local _WIN64 = (ffi.os == "Windows") and ffi.abi("64bit");
+
+--[=[
+
+
+if _WIN64 then
+    ffi.cdef[[
+    typedef int64_t   INT_PTR;
+    typedef uint64_t  UINT_PTR;
+    typedef int64_t   LONG_PTR;
+    typedef uint64_t  ULONG_PTR;
+    ]]
+else
+    ffi.cdef[[
+    typedef int             INT_PTR;
+    typedef unsigned int    UINT_PTR;
+    typedef long            LONG_PTR;
+    typedef unsigned long   ULONG_PTR;
+    ]]
+end
 
 ffi.cdef[[
+typedef void * LPVOID;
+]]
 
-// Basic Data types
-typedef unsigned char	BYTE;
-typedef long			BOOL;
-typedef BYTE			BOOLEAN;
-typedef char			CHAR;
-typedef wchar_t			WCHAR;
-typedef uint16_t		WORD;
-typedef unsigned long	DWORD;
-typedef uint32_t		DWORD32;
-typedef int				INT;
-typedef int32_t			INT32;
-typedef int64_t			INT64;
+ffi.cdef[[
+/* Types use for passing & returning polymorphic values */
+typedef UINT_PTR            WPARAM;
+typedef LONG_PTR            LPARAM;
+typedef LONG_PTR            LRESULT;
+]]
+
+ffi.cdef[[
+typedef ULONG_PTR   DWORD_PTR;
+typedef LONG_PTR    SSIZE_T;
+typedef ULONG_PTR   SIZE_T;
+
+typedef BOOL             *LPBOOL;
+typedef void *HANDLE;
+
+typedef BYTE *      PBYTE;
+typedef ULONG *     PULONG;
+]]
+--]=]
+
+
+-- Basic Data types
+ffi.cdef[[
+    typedef char                CHAR;
+    typedef signed char         INT8;
+    typedef unsigned char       UCHAR;
+    typedef unsigned char       UINT8;
+    typedef unsigned char       BYTE;
+    typedef BYTE                BOOLEAN;
+]]
+
+ffi.cdef[[
+    typedef int16_t             SHORT;
+    typedef int16_t             INT16;
+    typedef uint16_t            USHORT;
+    typedef uint16_t            UINT16;
+    typedef uint16_t            WORD;
+    typedef uint16_t            WCHAR;    // wc,   16-bit UNICODE character
+]]
+
+ffi.cdef[[
+    typedef int                 INT;
+    typedef int                 BOOL;
+    typedef int32_t             INT32;
+    typedef unsigned int        UINT;
+    typedef unsigned int        UINT32;
+    typedef long                LONG;
+    typedef signed int          LONG32;
+    typedef unsigned long       ULONG;
+    typedef unsigned int        ULONG32;
+    typedef unsigned long       DWORD;
+    typedef uint32_t            DWORD32;
+]]
+
+ffi.cdef[[
+    typedef int64_t             LONGLONG;
+    typedef int64_t             LONG64;
+    typedef int64_t             INT64;
+    typedef uint64_t            ULONGLONG;
+    typedef uint64_t            DWORDLONG;
+    typedef uint64_t            ULONG64;
+    typedef uint64_t            DWORD64;
+    typedef uint64_t            UINT64;
+]]
+
+
+ffi.cdef[[
 typedef float 			FLOAT;
-typedef long			LONG;
-typedef signed int		LONG32;
-typedef int64_t			LONGLONG;
 typedef size_t			SIZE_T;
-
 typedef uint8_t			BCHAR;
-typedef unsigned char	UCHAR;
-typedef unsigned int	UINT;
-typedef unsigned int	UINT32;
-typedef unsigned long	ULONG;
-typedef unsigned int	ULONG32;
-typedef unsigned short	USHORT;
-typedef uint64_t		ULONGLONG;
+]]
 
 
+ffi.cdef[[
 // Some pointer types
 typedef unsigned char	*PUCHAR;
 typedef unsigned int	*PUINT;

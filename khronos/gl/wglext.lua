@@ -33,7 +33,7 @@
 
 
 local ffi = require "ffi"
-require("khronos.gl.wtypes")
+require("khronos.wtypes")
 
 
 
