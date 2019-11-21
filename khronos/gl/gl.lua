@@ -1,10 +1,10 @@
 local ffi = require "ffi"
 
 
---[[
-	This file should be included from OglMan, and not directly
---]]
+require("khronos.gl.gl_platform")
 
+local exports = {
+	constants = {
 
 -- OpenGL Constants
  GL_ACCUM                          = 0x0100;
@@ -943,7 +943,8 @@ local ffi = require "ffi"
  GL_COMPRESSED_SRGB_ALPHA          = 0x8C49;
  GL_COMPRESSED_SLUMINANCE          = 0x8C4A;
  GL_COMPRESSED_SLUMINANCE_ALPHA    = 0x8C4B;
-
+};	-- constants
+}	-- exports
 
 
 
@@ -1580,4 +1581,4 @@ void glUniformBlockBinding(GLuint program, GLuint uniformBlockIndex, GLuint unif
 
 
 
-return gl
+return exports
