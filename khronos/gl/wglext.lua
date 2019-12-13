@@ -33,7 +33,7 @@
 
 
 local ffi = require "ffi"
-require("khronos.wtypes")
+require("khronos.win32_types")
 
 
 
@@ -440,15 +440,7 @@ DECLARE_HANDLE("HVIDEOINPUTDEVICENV");
 
 
 
-ffi.cdef[[
-typedef struct _GPU_DEVICE {
-    DWORD  cb;
-    CHAR   DeviceName[32];
-    CHAR   DeviceString[128];
-    DWORD  Flags;
-    RECT   rcVirtualScreen;
-} GPU_DEVICE, *PGPU_DEVICE;
-]]
+
 
 
 ffi.cdef[[
@@ -803,3 +795,6 @@ ffi.cdef[[
 
 	const char *wglGetExtensionsStringARB(HDC);
 ]]
+
+
+return exports

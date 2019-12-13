@@ -11,39 +11,7 @@ local _WIN64 = (ffi.os == "Windows") and ffi.abi("64bit");
 
 --[=[
 
-
-if _WIN64 then
-    ffi.cdef[[
-    typedef int64_t   INT_PTR;
-    typedef uint64_t  UINT_PTR;
-    typedef int64_t   LONG_PTR;
-    typedef uint64_t  ULONG_PTR;
-    ]]
-else
-    ffi.cdef[[
-    typedef int             INT_PTR;
-    typedef unsigned int    UINT_PTR;
-    typedef long            LONG_PTR;
-    typedef unsigned long   ULONG_PTR;
-    ]]
-end
-
 ffi.cdef[[
-typedef void * LPVOID;
-]]
-
-ffi.cdef[[
-/* Types use for passing & returning polymorphic values */
-typedef UINT_PTR            WPARAM;
-typedef LONG_PTR            LPARAM;
-typedef LONG_PTR            LRESULT;
-]]
-
-ffi.cdef[[
-typedef ULONG_PTR   DWORD_PTR;
-typedef LONG_PTR    SSIZE_T;
-typedef ULONG_PTR   SIZE_T;
-
 typedef BOOL             *LPBOOL;
 typedef void *HANDLE;
 
@@ -99,8 +67,9 @@ ffi.cdef[[
 
 
 ffi.cdef[[
+typedef LONG_PTR    SSIZE_T;
+typedef ULONG_PTR   SIZE_T;
 typedef float 			FLOAT;
-typedef size_t			SIZE_T;
 typedef uint8_t			BCHAR;
 ]]
 
@@ -115,16 +84,33 @@ typedef unsigned int	*PULONG32;
 typedef unsigned short	*PUSHORT;
 typedef LONGLONG 		*PLONGLONG;
 typedef ULONGLONG 		*PULONGLONG;
+]]
 
+if _WIN64 then
+    ffi.cdef[[
+    typedef int64_t   INT_PTR;
+    typedef uint64_t  UINT_PTR;
+    typedef int64_t   LONG_PTR;
+    typedef uint64_t  ULONG_PTR;
+    ]]
+else
+    ffi.cdef[[
+    typedef int             INT_PTR;
+    typedef unsigned int    UINT_PTR;
+    typedef long            LONG_PTR;
+    typedef unsigned long   ULONG_PTR;
+    ]]
+end
 
+ffi.cdef[[
 typedef void *			PVOID;
+typedef void *			LPVOID;
+
 typedef DWORD *			DWORD_PTR;
-typedef intptr_t		LONG_PTR;
-typedef uintptr_t		UINT_PTR;
-typedef uintptr_t		ULONG_PTR;
 typedef ULONG_PTR *		PULONG_PTR;
+]]
 
-
+ffi.cdef[[
 typedef DWORD *			LPCOLORREF;
 
 typedef BOOL *			LPBOOL;
@@ -134,20 +120,21 @@ typedef const short *	LPCWSTR;
 typedef LPSTR			LPTSTR;
 
 typedef DWORD *			LPDWORD;
-typedef void *			LPVOID;
+
 typedef WORD *			LPWORD;
 
 typedef const char *	LPCSTR;
 typedef LPCSTR			LPCTSTR;
 typedef const void *	LPCVOID;
+]]
 
-
+ffi.cdef[[
 typedef LONG_PTR		LRESULT;
-
 typedef LONG_PTR		LPARAM;
 typedef UINT_PTR		WPARAM;
+]]
 
-
+ffi.cdef[[
 typedef unsigned char	TBYTE;
 typedef char			TCHAR;
 
@@ -644,12 +631,14 @@ enum {
 --]]
 
 ffi.cdef[[
+typedef struct tagSIZE
+{
+    LONG        cx;
+    LONG        cy;
+} SIZE, *PSIZE, *LPSIZE;
+]]
 
-typedef struct tagSIZE {
-  LONG cx;
-  LONG cy;
-} SIZE, *PSIZE;
-
+ffi.cdef[[
 typedef struct tagPOINT {
   int32_t x;
   int32_t y;
@@ -659,14 +648,19 @@ typedef struct _POINTL {
   LONG x;
   LONG y;
 } POINTL, *PPOINTL;
-
-typedef struct tagRECT {
-	int32_t left;
-	int32_t top;
-	int32_t right;
-	int32_t bottom;
-} RECT, *PRECT;
 ]]
+
+ffi.cdef[[
+typedef struct tagRECT
+{
+    LONG    left;
+    LONG    top;
+    LONG    right;
+    LONG    bottom;
+} RECT, *PRECT, *NPRECT, *LPRECT;
+typedef const RECT * LPCRECT;
+]]
+
 
 RECT = nil
 RECT_mt = {
@@ -849,4 +843,13 @@ BITMAPINFO_mt = {
 }
 BITMAPINFO = ffi.metatype("BITMAPINFO", BITMAPINFO_mt)
 
+ffi.cdef[[
+typedef struct _GPU_DEVICE {
+    DWORD  cb;
+    CHAR   DeviceName[32];
+    CHAR   DeviceString[128];
+    DWORD  Flags;
+    RECT   rcVirtualScreen;
+} GPU_DEVICE, *PGPU_DEVICE;
+]]
 

@@ -22,27 +22,9 @@ local exports = {}
 
 _WIN64 = (ffi.os == "Windows") and ffi.abi("64bit");
 
-require("khronos.gl.wtypes")
+require("khronos.win32_types")
 
-if _WIN64 then
-    ffi.cdef[[
-    typedef int64_t   INT_PTR;
-    typedef uint64_t  UINT_PTR;
-    typedef int64_t   LONG_PTR;
-    typedef uint64_t  ULONG_PTR;
-    ]]
-else
-    ffi.cdef[[
-    typedef int             INT_PTR;
-    typedef unsigned int    UINT_PTR;
-    typedef long            LONG_PTR;
-    typedef unsigned long   ULONG_PTR;
-    ]]
-end
 
-ffi.cdef[[
-typedef void * LPVOID;
-]]
 
 ffi.cdef[[
 /* Types use for passing & returning polymorphic values */
@@ -83,34 +65,18 @@ static const int MAXDWORD   = 0xffffffff;
 ffi.cdef[[
 typedef DWORD   COLORREF;
 typedef DWORD   *LPCOLORREF;
+]]
 
-typedef struct tagPOINT
-{
-    LONG  x;
-    LONG  y;
-} POINT, *PPOINT, *NPPOINT, *LPPOINT;
-    
+
+
+ffi.cdef[[
 typedef struct tagPOINTS
 {
     SHORT   x;
     SHORT   y;
 } POINTS, *PPOINTS, *LPPOINTS;
-
-typedef struct tagSIZE
-{
-    LONG        cx;
-    LONG        cy;
-} SIZE, *PSIZE, *LPSIZE;
-
-typedef struct tagRECT
-{
-    LONG    left;
-    LONG    top;
-    LONG    right;
-    LONG    bottom;
-} RECT, *PRECT, *NPRECT, *LPRECT;
-typedef const RECT * LPCRECT;
 ]]
+
 
 -- winuser
 ffi.cdef[[
@@ -268,31 +234,6 @@ typedef struct tagMSG {
     POINT       pt;
 } MSG, *PMSG, *LPMSG;
 
-typedef struct tagRGBQUAD {
-    BYTE    rgbBlue;
-    BYTE    rgbGreen;
-    BYTE    rgbRed;
-    BYTE    rgbReserved;
-} RGBQUAD;
-
-typedef struct tagBITMAPINFOHEADER{
-    DWORD      biSize;
-    LONG       biWidth;
-    LONG       biHeight;
-    WORD       biPlanes;
-    WORD       biBitCount;
-    DWORD      biCompression;
-    DWORD      biSizeImage;
-    LONG       biXPelsPerMeter;
-    LONG       biYPelsPerMeter;
-    DWORD      biClrUsed;
-    DWORD      biClrImportant;
-} BITMAPINFOHEADER,  *LPBITMAPINFOHEADER, *PBITMAPINFOHEADER;
-
-typedef struct tagBITMAPINFO {
-    BITMAPINFOHEADER    bmiHeader;
-    RGBQUAD             bmiColors[1];
-} BITMAPINFO,  *LPBITMAPINFO, *PBITMAPINFO;
 ]]
 
 ffi.cdef[[
@@ -649,7 +590,7 @@ UINT GetDpiForWindow(HWND hwnd);
 int GetSystemMetrics(int nIndex);
 BOOL InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase);
 BOOL RedrawWindow(HWND hWnd, const RECT *lprcUpdate, HRGN hrgnUpdate, UINT flags);
-BOOL ScreenToClient(HWND hWnd, LPPOINT lpPoint);
+BOOL ScreenToClient(HWND hWnd, PPOINT lpPoint);
 BOOL SetWindowPos(HWND hWnd, HWND hWndInsertAfter,int X,int Y,int cx,int cy, UINT uFlags);
 BOOL ShowWindow(HWND hWnd, int nCmdShow);
 BOOL UpdateLayeredWindow(HWND hWnd, HDC hdcDst, POINT* pptDst, SIZE* psize, 
